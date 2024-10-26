@@ -9,6 +9,8 @@ const StudyApp = () => {
   const [error, setError] = useState('');
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const startRecording = async () => {
     try {
@@ -116,96 +118,158 @@ const StudyApp = () => {
     setLoading(false);
   };
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'audio/mpeg') {
+      setUploadedFile(file);
+    } else {
+      setError('Please upload a valid MP3 file.');
+    }
+  };
+
+  const transcribeUploadedFile = async () => {
+    if (!uploadedFile) {
+      setError('Please upload an MP3 file first.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+
+      const response = await fetch('http://localhost:5001/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Transcription failed');
+      }
+      
+      const data = await response.json();
+      setTranscription(data.transcript);
+    } catch (error) {
+      setError(error.message);
+      console.error('Transcription error:', error);
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-3xl font-bold mb-6">Study Assistant</h1>
-          
-          {/* Error Display */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-          
-          {/* Recording Controls */}
-          <div className="mb-6">
-            {!isRecording ? (
-              <button
-                onClick={startRecording}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Start Recording
-              </button>
-            ) : (
-              <button
-                onClick={stopRecording}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                Stop Recording
-              </button>
-            )}
+    <div className="container">
+      <div className="card">
+        <h1>Study Assistant</h1>
+        
+        {error && (
+          <div className="error-message">
+            {error}
           </div>
-
-          {/* Transcription Section */}
-          {transcription && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Transcription</h2>
-              <div className="bg-gray-50 p-4 rounded">
-                {transcription}
-              </div>
-              <button
-                onClick={convertToNotes}
-                className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                disabled={loading}
-              >
-                Convert to Notes
-              </button>
-            </div>
-          )}
-
-          {/* Notes Section */}
-          {notes && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Notes</h2>
-              <div className="bg-gray-50 p-4 rounded whitespace-pre-wrap">
-                {notes}
-              </div>
-              <button
-                onClick={createFlashcards}
-                className="mt-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                disabled={loading}
-              >
-                Create Flashcards
-              </button>
-            </div>
-          )}
-
-          {/* Flashcards Section */}
-          {flashcards.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Flashcards</h2>
-              <div className="space-y-4">
-                {flashcards.map((card, index) => (
-                  <div key={index} className="border p-4 rounded">
-                    <div className="font-semibold mb-2">Q: {card.question}</div>
-                    <div>A: {card.answer}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Loading Indicator */}
-          {loading && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white p-4 rounded">
-                Processing...
-              </div>
-            </div>
+        )}
+        
+        <div className="input-group">
+          {!isRecording ? (
+            <button
+              onClick={startRecording}
+              className="btn-primary"
+            >
+              Start Recording
+            </button>
+          ) : (
+            <button
+              onClick={stopRecording}
+              className="btn-danger"
+            >
+              Stop Recording
+            </button>
           )}
         </div>
+
+        <div className="input-group">
+          <input
+            type="file"
+            accept=".mp3,audio/mpeg"
+            onChange={handleFileUpload}
+            ref={fileInputRef}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className="btn-secondary"
+          >
+            Upload MP3
+          </button>
+          {uploadedFile && (
+            <span className="text-light">
+              {uploadedFile.name}
+            </span>
+          )}
+        </div>
+
+        {uploadedFile && (
+          <button
+            onClick={transcribeUploadedFile}
+            className="btn-primary"
+          >
+            Transcribe Uploaded File
+          </button>
+        )}
+
+        {transcription && (
+          <div className="card">
+            <h2>Transcription</h2>
+            <div className="transcription-content">
+              {transcription}
+            </div>
+            <button
+              onClick={convertToNotes}
+              className="btn-secondary"
+              disabled={loading}
+            >
+              Convert to Notes
+            </button>
+          </div>
+        )}
+
+        {notes && (
+          <div className="card">
+            <h2>Notes</h2>
+            <div className="notes-content">
+              {notes}
+            </div>
+            <button
+              onClick={createFlashcards}
+              className="btn-accent"
+              disabled={loading}
+            >
+              Create Flashcards
+            </button>
+          </div>
+        )}
+
+        {flashcards.length > 0 && (
+          <div className="card">
+            <h2>Flashcards</h2>
+            <div className="flashcards-container">
+              {flashcards.map((card, index) => (
+                <div key={index} className="flashcard">
+                  <div className="flashcard-question">Q: {card.question}</div>
+                  <div className="flashcard-answer">A: {card.answer}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loading-content">
+              Processing...
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
