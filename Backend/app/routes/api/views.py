@@ -3,8 +3,7 @@ import logging
 from openai import OpenAI
 import os
 import json
-from llama_index.core import PromptTemplate
-from llama_index.llms.openai import OpenAI
+from notes import get_notes
 
 # from app.content_generation import  
 from . import api_bp  # Import the Blueprint
@@ -100,32 +99,9 @@ def notes():
     transcript = request.json.get('transcript')
     if not transcript:
         return jsonify({"error": "No transcript provided"}), 400
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    
     try:
-        template = (
-            "You are the world's best lecture notes taker. Only take notes on factual information that is necessary to learn. "
-            "You will be passed in a transcript from a part of a lecture and you have to take nicely formatted notes on it. "
-            "Use lots of emojis and beautiful formatting. Ensure every single line has at least one emoji. "
-            "The transcript may have errors so use your best judgement.\n"
-            "---------------------\n"
-            "{transcript_str}"
-            "\n---------------------\n"
-            "Given this information, please create a summary note.\n"
-        )
-
-        prompt = template.format(transcript_str=transcript)
-
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an expert note-taker."},
-                {"role": "user", "content": prompt}
-            ],
-            stream=True
-        )
-
+        response = get_notes(transcript)
+        print(response)
         notes = ""
         for chunk in response:
             if chunk.choices[0].delta.content is not None:
