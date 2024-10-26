@@ -101,14 +101,13 @@ def notes():
         return jsonify({"error": "No transcript provided"}), 400
     try:
         response = get_notes(transcript)
-        print(response)
         notes = response.text
-        # for chunk in response:
-        #     if chunk.choices[0].delta.content is not None:
-        #         notes += chunk.choices[0].delta.content
 
-        logging.info(f"Generated notes: {notes[:100]}...")  # Log first 100 characters
-        return jsonify({"notes": notes}), 200
+        # Preserve formatting by using json.dumps with ensure_ascii=False
+        formatted_notes = json.dumps({"notes": notes}, ensure_ascii=False)
+
+        logging.info(f"Generated notes: {notes}")  # Log first 100 characters
+        return formatted_notes, 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as e:
         logging.error(f"Error generating notes: {str(e)}")
         return jsonify({"error": "Failed to generate notes"}), 500

@@ -237,7 +237,7 @@ const StudyApp = () => {
         {notes && (
           <div className="card">
             <h2>Notes</h2>
-            <div className="notes-content">
+            <div className="notes-content" style={{ whiteSpace: 'pre-wrap' }}>
               {notes}
             </div>
             <button
