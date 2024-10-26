@@ -1,15 +1,12 @@
 from flask import abort, jsonify, request
 import logging
-import openai
+from openai import OpenAI
 import os
 
 # from app.content_generation import  
 from . import api_bp  # Import the Blueprint
 
 logging.basicConfig(level=logging.INFO)
-
-# Set up OpenAI client
-openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 @api_bp.route('/transcribe', methods=['POST'])
 def transcribe():
@@ -23,21 +20,29 @@ def transcribe():
     
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
-    from openai import OpenAI
-    client = OpenAI()
 
-    audio_file= open("/test_files/yc.mp3", "rb")
-    transcription = client.audio.transcriptions.create(
-        model="whisper-1", 
-        file=audio_file
-    )
-    print(transcription.text)
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
     if file:
         try:
-            # Call OpenAI's transcription API
-            transcript = openai.Audio.transcribe("whisper-1", file)
-            logging.info(f"Transcript: {transcript['text']}")
-            return jsonify({"transcript": transcript['text']}), 200
+            # Save the file temporarily
+            temp_path = f"/tmp/{file.filename}"
+            file.save(temp_path)
+            
+            # Open the file in binary mode
+            with open(temp_path, "rb") as audio_file:
+                transcription = client.audio.transcriptions.create(
+                    model="whisper-1", 
+                    file=audio_file
+                )
+            
+            # Remove the temporary file
+            os.remove(temp_path)
+            
+            logging.info(f"Transcript: {transcription.text}")
+            # print the number of words in the transcript
+            logging.info(f"Number of words: {len(transcription.text.split())}")
+            return jsonify({"transcript": transcription.text}), 200
         except Exception as e:
             logging.error(f"Error during transcription: {str(e)}")
             return jsonify({"error": "Transcription failed"}), 500
