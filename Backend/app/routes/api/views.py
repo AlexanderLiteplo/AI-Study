@@ -102,10 +102,10 @@ def notes():
     try:
         response = get_notes(transcript)
         print(response)
-        notes = ""
-        for chunk in response:
-            if chunk.choices[0].delta.content is not None:
-                notes += chunk.choices[0].delta.content
+        notes = response.text
+        # for chunk in response:
+        #     if chunk.choices[0].delta.content is not None:
+        #         notes += chunk.choices[0].delta.content
 
         logging.info(f"Generated notes: {notes[:100]}...")  # Log first 100 characters
         return jsonify({"notes": notes}), 200

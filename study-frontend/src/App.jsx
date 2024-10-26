@@ -21,13 +21,14 @@ const StudyApp = () => {
       };
 
       mediaRecorder.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-        const formData = new FormData();
-        formData.append('file', audioBlob); // Changed to 'file' as per API docs
-
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/mp3' });
+        
         setLoading(true);
         setError('');
         try {
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'recording.mp3');
+
           const response = await fetch('http://localhost:5001/api/transcribe', {
             method: 'POST',
             body: formData,
@@ -39,7 +40,7 @@ const StudyApp = () => {
           }
           
           const data = await response.json();
-          setTranscription(data.transcript); // Changed to match API response
+          setTranscription(data.transcript);
         } catch (error) {
           setError(error.message);
           console.error('Transcription error:', error);
