@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 const StudyApp = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -237,8 +238,8 @@ const StudyApp = () => {
         {notes && (
           <div className="card">
             <h2>Notes</h2>
-            <div className="notes-content" style={{ whiteSpace: 'pre-wrap' }}>
-              {notes}
+            <div className="notes-content">
+              <ReactMarkdown>{notes}</ReactMarkdown>
             </div>
             <button
               onClick={createFlashcards}
