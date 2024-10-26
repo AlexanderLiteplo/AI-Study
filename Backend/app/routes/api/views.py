@@ -2,6 +2,7 @@ from flask import abort, jsonify, request
 import logging
 from openai import OpenAI
 import os
+import json
 
 # from app.content_generation import  
 from . import api_bp  # Import the Blueprint
@@ -49,6 +50,42 @@ def transcribe():
 
 # Test: curl -X POST -H "Content-Type: multipart/form-data" -F "file=@/test_files/yc.mp3" http://localhost:5001/api/transcribe
 
+@api_bp.route('/flashcards', methods=['POST'])
+def flashcards():
+    '''
+    input:
+    {
+        "notes": "string"
+    }
+    '''
+    notes = request.json.get('notes')
+    
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": """You are a flashcard text maker. 
+                You are given a text and you must make flashcards for it of any memorizable concepts or facts.
+                You must reply in only json format with a list of flashcards.
+                Flashcards must be of the format: {"term": "front of card", "definition": "back of card"}.
+                The list should be of the format: {"card_list": [{"term": "front of card", "definition": "back of card"}, ...]}
+                Reply with the json list and nothing else."""},
+                {"role": "user", "content": f"Here is the text to make json flashcards for: {notes}"}
+            ]
+        )
+        
+        # Extract the JSON content from the response
+        flashcards_json = json.loads(response.choices[0].message.content)
+        
+        # Convert the JSON to a list of tuples
+        flashcards_list = [(card['term'], card['definition']) for card in flashcards_json['card_list']]
+        
+        return jsonify({"flashcards": flashcards_list}), 200
+    except Exception as e:
+        logging.error(f"Error generating flashcards: {str(e)}")
+        return jsonify({"error": "Failed to generate flashcards"}), 500
 
 @api_bp.route('/notes', methods=['POST'])
 def notes():
