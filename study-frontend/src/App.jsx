@@ -194,6 +194,7 @@ const StudyApp = () => {
             onChange={handleFileUpload}
             ref={fileInputRef}
             className="hidden"
+            style={{ display: 'none' }}
           />
           <button
             onClick={() => fileInputRef.current.click()}
