@@ -13,6 +13,8 @@ const StudyApp = () => {
   const audioChunks = useRef([]);
   const [uploadedFile, setUploadedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const startRecording = async () => {
     try {
@@ -164,6 +166,20 @@ const StudyApp = () => {
     setTranscription(event.target.value);
   };
 
+  const nextCard = () => {
+    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
+    setShowAnswer(false);
+  };
+
+  const previousCard = () => {
+    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + flashcards.length) % flashcards.length);
+    setShowAnswer(false);
+  };
+
+  const flipCard = () => {
+    setShowAnswer(!showAnswer);
+  };
+
   return (
     <div className="container">
       
@@ -268,13 +284,33 @@ const StudyApp = () => {
         {flashcards.length > 0 && (
           <div className="card">
             <h2>Flashcards</h2>
-            <div className="flashcards-container">
-              {flashcards.map((card, index) => (
-                <div key={index} className="flashcard">
-                  <div className="flashcard-question">Q: {card.question}</div>
-                  <div className="flashcard-answer">A: {card.answer}</div>
-                </div>
-              ))}
+            <div className="flashcard-container">
+              <div 
+                className="flashcard" 
+                onClick={flipCard}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  height: '200px', // Adjust this value as needed
+                }}
+              >
+                {showAnswer ? (
+                  <div className="flashcard-question">
+                    <strong>A:</strong> {flashcards[currentCardIndex].answer}
+                  </div>
+                ) : (
+                  <div className="flashcard-question">
+                    <strong>Q:</strong> {flashcards[currentCardIndex].question}
+                  </div>
+                )}
+              </div>
+              <div className="flashcard-navigation" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                <button onClick={previousCard} className="btn-secondary">Previous</button>
+                <span>{currentCardIndex + 1} / {flashcards.length}</span>
+                <button onClick={nextCard} className="btn-secondary">Next</button>
+              </div>
             </div>
           </div>
         )}
