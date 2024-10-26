@@ -3,6 +3,8 @@ import logging
 from openai import OpenAI
 import os
 import json
+from llama_index.core import PromptTemplate
+from llama_index.llms.openai import OpenAI
 
 # from app.content_generation import  
 from . import api_bp  # Import the Blueprint
@@ -78,7 +80,7 @@ def flashcards():
         
         # Extract the JSON content from the response
         flashcards_json = json.loads(response.choices[0].message.content)
-        
+        logging.info(f"Flashcards: {flashcards_json}")
         # Convert the JSON to a list of tuples
         flashcards_list = [(card['term'], card['definition']) for card in flashcards_json['card_list']]
         
@@ -95,8 +97,44 @@ def notes():
         "transcript": "string"
     }
     '''
-    # fetch transcript from request
     transcript = request.json.get('transcript')
-    notes = ""
-    # make stub return
-    return jsonify({"notes": notes}), 200
+    if not transcript:
+        return jsonify({"error": "No transcript provided"}), 400
+
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    try:
+        template = (
+            "You are the world's best lecture notes taker. Only take notes on factual information that is necessary to learn. "
+            "You will be passed in a transcript from a part of a lecture and you have to take nicely formatted notes on it. "
+            "Use lots of emojis and beautiful formatting. Ensure every single line has at least one emoji. "
+            "The transcript may have errors so use your best judgement.\n"
+            "---------------------\n"
+            "{transcript_str}"
+            "\n---------------------\n"
+            "Given this information, please create a summary note.\n"
+        )
+
+        prompt = template.format(transcript_str=transcript)
+
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an expert note-taker."},
+                {"role": "user", "content": prompt}
+            ],
+            stream=True
+        )
+
+        notes = ""
+        for chunk in response:
+            if chunk.choices[0].delta.content is not None:
+                notes += chunk.choices[0].delta.content
+
+        logging.info(f"Generated notes: {notes[:100]}...")  # Log first 100 characters
+        return jsonify({"notes": notes}), 200
+    except Exception as e:
+        logging.error(f"Error generating notes: {str(e)}")
+        return jsonify({"error": "Failed to generate notes"}), 500
+
+#curl -X POST http://localhost:5001/api/notes   -H "Content-Type: application/json"   -d @../transcript_example.json
