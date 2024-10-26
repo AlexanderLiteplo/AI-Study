@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import VoiceComponent from './VoiceComponent';
 
 const StudyApp = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -161,6 +162,9 @@ const StudyApp = () => {
 
   return (
     <div className="container">
+      
+      <VoiceComponent/>
+
       <div className="card">
         <h1>Study Assistant</h1>
         
