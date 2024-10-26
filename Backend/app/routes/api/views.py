@@ -4,6 +4,7 @@ from openai import OpenAI
 import os
 import json
 from notes import get_notes
+import random
 
 # from app.content_generation import  
 from . import api_bp  # Import the Blueprint
@@ -113,3 +114,14 @@ def notes():
         return jsonify({"error": "Failed to generate notes"}), 500
 
 #curl -X POST http://localhost:5001/api/notes   -H "Content-Type: application/json"   -d @../transcript_example.json
+
+@api_bp.route('/random-sound', methods=['GET'])
+def random_sound():
+    sounds_folder = './sounds'
+    sound_files = [f for f in os.listdir(sounds_folder) if f.endswith('.mp3')]
+    
+    if not sound_files:
+        return jsonify({"error": "No sound files found"}), 404
+    
+    random_sound = random.choice(sound_files)
+    return jsonify({"sound": random_sound}), 200

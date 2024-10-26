@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import VoiceComponent from './VoiceComponent';
+import axios from 'axios';  // Add this import at the top of the file
 
 const StudyApp = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -15,6 +16,27 @@ const StudyApp = () => {
   const fileInputRef = useRef(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [soundFiles, setSoundFiles] = useState([]);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    // Fetch the list of sound files from the server
+    fetch('http://localhost:5001/api/sounds')
+      .then(response => response.json())
+      .then(data => setSoundFiles(data.sounds))
+      .catch(error => console.error('Error fetching sound files:', error));
+  }, []);
+
+  useEffect(() => {
+    // This is a simulated list of sound files
+    // In a real scenario, you might want to generate this list dynamically
+    setSoundFiles([
+      'sound1.mp3',
+      'sound2.mp3',
+      'sound3.mp3',
+      'sound4.mp3',
+    ]);
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -169,6 +191,7 @@ const StudyApp = () => {
   const nextCard = () => {
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
     setShowAnswer(false);
+    playRandomSound();
   };
 
   const previousCard = () => {
@@ -178,6 +201,14 @@ const StudyApp = () => {
 
   const flipCard = () => {
     setShowAnswer(!showAnswer);
+  };
+
+  const playRandomSound = () => {
+    if (soundFiles.length > 0) {
+      const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+      const audio = new Audio(`/sounds/${randomSound}`);
+      audio.play().catch(error => console.error('Error playing sound:', error));
+    }
   };
 
   return (
