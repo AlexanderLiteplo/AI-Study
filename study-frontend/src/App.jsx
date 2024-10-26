@@ -163,7 +163,7 @@ const StudyApp = () => {
   return (
     <div className="container">
       
-      <VoiceComponent/>
+      {/* <VoiceComponent/> */}
 
       <div className="card">
         <h1>Study Assistant</h1>

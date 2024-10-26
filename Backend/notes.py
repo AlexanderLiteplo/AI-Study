@@ -9,7 +9,7 @@ def get_notes(transcript):
     load_dotenv()
     # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     template = (
-        "You are the world's best lecture notes taker. Only take notes on factual information that is necessary to learn. You will be passed in a transcript from a part of a lecture and you have to take nicely formatted notes on it. Use lot's of emojis and beautiful formatting. Ensure every single line has at least one emoji. The transcript may have errors so use your best judgement \n"
+        "You are the world's best lecture notes taker. Format your notes in markdown. Only take notes on factual information that is necessary to learn. You will be passed in a transcript from a part of a lecture and you have to take nicely formatted notes on it. Use lot's of emojis and beautiful formatting. Ensure every single line has at least one emoji. The transcript may have errors so use your best judgement \n"
         "---------------------\n"
         "{transcript_str}"
         "\n---------------------\n"
