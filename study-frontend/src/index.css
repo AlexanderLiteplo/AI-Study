@@ -209,3 +209,50 @@ button:active {
     padding: 1.5rem;
   }
 }
+
+.transcription-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Ensure the card takes full width */
+}
+
+.transcription-content {
+  margin-bottom: 15px;
+  width: 100%; /* Ensure content takes full width */
+}
+
+.transcription-textarea {
+  width: 100%; /* Make textarea fill its container */
+  min-height: 200px;
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-family: 'Arial', sans-serif;
+  font-size: 18px; /* Increase font size */
+  line-height: 1.6; /* Adjust line height for readability */
+  color: #495057;
+  background-color: #fff;
+  resize: vertical;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.transcription-textarea:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.transcription-textarea::placeholder {
+  color: #6c757d;
+  opacity: 0.6;
+}
+
+/* Increase the size of the "Convert to Notes" button */
+.btn-secondary {
+  font-size: 16px;
+  padding: 10px 20px;
+}

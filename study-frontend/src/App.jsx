@@ -160,6 +160,10 @@ const StudyApp = () => {
     setLoading(false);
   };
 
+  const handleTranscriptionChange = (event) => {
+    setTranscription(event.target.value);
+  };
+
   return (
     <div className="container">
       
@@ -224,10 +228,16 @@ const StudyApp = () => {
         )}
 
         {transcription && (
-          <div className="card">
+          <div className="card transcription-card">
             <h2>Transcription</h2>
             <div className="transcription-content">
-              {transcription}
+              <textarea
+                value={transcription}
+                onChange={handleTranscriptionChange}
+                className="transcription-textarea"
+                rows={10}
+                placeholder="Your transcription will appear here. Feel free to edit any mistakes."
+              />
             </div>
             <button
               onClick={convertToNotes}
