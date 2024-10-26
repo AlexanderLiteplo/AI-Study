@@ -18,6 +18,8 @@ const StudyApp = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [soundFiles, setSoundFiles] = useState([]);
   const audioRef = useRef(null);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [showImage, setShowImage] = useState(false);
 
   useEffect(() => {
     // Fetch the list of sound files from the server
@@ -192,6 +194,13 @@ const StudyApp = () => {
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
     setShowAnswer(false);
     playRandomSound();
+    setCurrentImage(getRandomImage());
+    setShowImage(true);
+    
+    // Set a timeout to hide the image after 5 seconds
+    setTimeout(() => {
+      setShowImage(false);
+    }, 5000);
   };
 
   const previousCard = () => {
@@ -209,6 +218,11 @@ const StudyApp = () => {
       const audio = new Audio(`/sounds/${randomSound}`);
       audio.play().catch(error => console.error('Error playing sound:', error));
     }
+  };
+
+  const getRandomImage = () => {
+    const images = ['image1.png', 'image2.png'];
+    return images[Math.floor(Math.random() * images.length)];
   };
 
   return (
@@ -321,12 +335,24 @@ const StudyApp = () => {
                 onClick={flipCard}
                 style={{
                   display: 'flex',
+                  flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
                   textAlign: 'center',
-                  height: '200px', // Adjust this value as needed
+                  height: '300px',
                 }}
               >
+                {showImage && currentImage && (
+                  <img 
+                    src={`/images/${currentImage}`} 
+                    alt="Random study image" 
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '150px',
+                      marginBottom: '10px'
+                    }}
+                  />
+                )}
                 {showAnswer ? (
                   <div className="flashcard-question">
                     <strong>A:</strong> {flashcards[currentCardIndex].answer}
@@ -340,7 +366,9 @@ const StudyApp = () => {
               <div className="flashcard-navigation" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
                 <button onClick={previousCard} className="btn-secondary">Previous</button>
                 <span>{currentCardIndex + 1} / {flashcards.length}</span>
-                <button onClick={nextCard} className="btn-secondary">Next</button>
+                <button onClick={nextCard} className="btn-secondary">
+                  Complete <span role="img" aria-label="check mark">✅</span>
+                </button>
               </div>
             </div>
           </div>
