@@ -20,6 +20,7 @@ const StudyApp = () => {
   const audioRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [showImage, setShowImage] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
     // Fetch the list of sound files from the server
@@ -29,7 +30,7 @@ const StudyApp = () => {
       .catch(error => console.error('Error fetching sound files:', error));
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { 
     // This is a simulated list of sound files
     // In a real scenario, you might want to generate this list dynamically
     setSoundFiles([
@@ -37,6 +38,8 @@ const StudyApp = () => {
       'sound2.mp3',
       'sound3.mp3',
       'sound4.mp3',
+      'sound5.mp3',
+      'sound6.mp3',
     ]);
   }, []);
 
@@ -193,14 +196,20 @@ const StudyApp = () => {
   const nextCard = () => {
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
     setShowAnswer(false);
-    playRandomSound();
-    setCurrentImage(getRandomImage());
-    setShowImage(true);
+    setClickCount((prevCount) => prevCount + 1);
     
-    // Set a timeout to hide the image after 5 seconds
-    setTimeout(() => {
+    if (clickCount % 3 === 2) { // Every 3rd click (0, 1, 2, 3, 4, 5, ...)
+      playRandomSound();
+      setCurrentImage(getRandomImage());
+      setShowImage(true);
+      
+      // Set a timeout to hide the image after 5 seconds
+      setTimeout(() => {
+        setShowImage(false);
+      }, 5000);
+    } else {
       setShowImage(false);
-    }, 5000);
+    }
   };
 
   const previousCard = () => {
